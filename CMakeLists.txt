@@ -17,7 +17,7 @@ catkin_package(
  
 )
 
-find_package(OpenCV 3.2.0 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -26,8 +26,9 @@ include_directories(
   /opt/MVS/include/
 )
 
+
 LINK_DIRECTORIES(
-/opt/MVS/lib/64/
+/opt/MVS/lib/${CMAKE_SYSTEM_PROCESSOR}/
 )
 
 add_executable(${PROJECT_NAME}
@@ -36,17 +37,17 @@ src/hikrobot_camera.cpp)
  target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
-   GCBase_gcc421_v3_0
    MvCameraControl
-   GenApi_gcc421_v3_0
-   MVGigEVisionSDK
-   log4cpp_gcc421_v3_0
-   MVRender
-   Log_gcc421_v3_0
-   MvUsb3vTL
-   MathParser_gcc421_v3_0
-   NodeMapData_gcc421_v3_0
-   MediaProcess
-   XmlParser_gcc421_v3_0
-   X11
+   # GCBase_gcc421_v3_0
+   # GenApi_gcc421_v3_0
+   # MVGigEVisionSDK
+   # log4cpp_gcc421_v3_0
+   # MVRender
+   # Log_gcc421_v3_0
+   # MvUsb3vTL
+   # MathParser_gcc421_v3_0
+   # NodeMapData_gcc421_v3_0
+   # MediaProcess
+   # XmlParser_gcc421_v3_0
+   # X11
  )
