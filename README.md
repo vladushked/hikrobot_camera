@@ -1,22 +1,38 @@
-# HIKROBOT-MVS-CAMERA-ROS
-The ros driver package of Hikvision Industrial Camera SDK. Support configuration parameters, the parameters have been optimized, and the photos have been transcoded to rgb format.
-Please install mvs, https://blog.csdn.net/weixin_41965898/article/details/116801491
+# Installation 
 
-# Install
+## MVS sdk
+Download the SDK according to your platform architecture. 
+https://www.hikrobotics.com/cn/machinevision/service/download
+
+For x86 platform
 ```
-mkdir -p ~/ws_hikrobot_camera/src
-git clone https://github.com/luckyluckydadada/HIKROBOT-MVS-CAMERA-ROS.git ~/ws_hikrobot_camera/src/hikrobot_camera
-cd ~/ws_hikrobot_camera
-catkin_make
+dpkg -i MVS-2.1.0_x86_64_20201228.deb
 ```
-# launch run
+For aarch64 platform like Jeston Nano or NX
 ```
-source ./devel/setup.bash 
+dpkg -i MVS-2.1.0_aarch64_20201228.deb
+```
+After install the sdk
+```
+source ~/.bashrc
+```
+
+## hikrobot_camera
+```
+cd ~/catkin_ws/src
+git clone https://github.com/tianb03/hikrobot_camera
+cd .. && catkin_make
+```
+
+
+# launch
+Indoor, outdoor launch files take in different params.
+```
 roslaunch hikrobot_camera hikrobot_camera.launch
+rosrun image_view image_view image:=/hikrobot_camera/rgb
 ```
-# launch run
-use rviz subscribe topic： /hikrobot_camera/rgb
+
+or launch RVIZ to show the image
 ```
-source ./devel/setup.bash 
 roslaunch hikrobot_camera hikrobot_camera_rviz.launch
 ```
