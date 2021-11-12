@@ -26,10 +26,15 @@ include_directories(
   /opt/MVS/include/
 )
 
-
-LINK_DIRECTORIES(
-/opt/MVS/lib/${CMAKE_SYSTEM_PROCESSOR}/
-)
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
+  LINK_DIRECTORIES(
+  /opt/MVS/lib/aarch64/
+  )
+elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+  LINK_DIRECTORIES(
+  /opt/MVS/lib/64/
+  )
+endif()
 
 add_executable(${PROJECT_NAME}
 src/hikrobot_camera.cpp)
