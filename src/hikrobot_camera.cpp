@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         MVS_cap.ReadImg(src);
         if (src.empty())
         {
-            std::cout << "Изображение пустое" << std::endl;
+            // std::cout << "Изображение пустое" << std::endl;
             continue;
         }
         // Сохраняем изображение в смонтированную папку /data
