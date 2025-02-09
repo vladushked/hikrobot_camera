@@ -7,6 +7,8 @@
 #include "MvErrorDefine.h"
 #include "CameraParams.h"
 #include "MvCameraControl.h"
+#include <ros/ros.h>
+
 
 namespace camera
 {
@@ -14,6 +16,9 @@ namespace camera
 #define MAX_IMAGE_DATA_SIZE (4 * 3648 * 5472)
     //********** frame ************************************/
     cv::Mat frame;
+    //********** capture time и frame index ******************************/
+    ros::Time capture_time;
+    unsigned long frame_index = 0;
     //********** frame_empty ******************************/
     bool frame_empty = 0;
     //********** mutex ************************************/
@@ -61,7 +66,7 @@ namespace camera
         //********** 恢复默认参数 *************************/
         bool reset();
         //********** 读图10个相机的原始图像 ********************************/
-        void ReadImg(cv::Mat &image);
+        void ReadImg(cv::Mat &image, ros::Time &capture_time, unsigned long &frame_index);
 
     private:
         //********** handle ******************************/
@@ -673,9 +678,8 @@ namespace camera
     }
 
     //^ ********************************** Camera constructor************************************ //
-    void Camera::ReadImg(cv::Mat &image)
+    void Camera::ReadImg(cv::Mat &image, ros::Time &capture_time, unsigned long &frame_index)
     {
-
         pthread_mutex_lock(&mutex);
         if (frame_empty)
         {
@@ -684,10 +688,13 @@ namespace camera
         else
         {
             image = camera::frame.clone();
+            capture_time = camera::capture_time;
+            frame_index = camera::frame_index;
             frame_empty = 1;
         }
         pthread_mutex_unlock(&mutex);
     }
+
 
     //^ ********************************** HKWorkThread1 ************************************ //
     void *Camera::HKWorkThread(void *p_handle)
@@ -704,6 +711,7 @@ namespace camera
         {
             start = static_cast<double>(cv::getTickCount());
             nRet = MV_CC_GetOneFrameTimeout(p_handle, m_pBufForDriver, MAX_IMAGE_DATA_SIZE, &stImageInfo, 15);
+            ros::Time current_time = ros::Time::now();
             if (nRet != MV_OK)
             {
                 if (++image_empty_count > 100)
@@ -729,9 +737,14 @@ namespace camera
             cv::Mat original = cv::Mat(stImageInfo.nHeight, stImageInfo.nWidth, CV_8UC3, m_pBufForSaveImage).clone();
             cv::Mat resized;
             cv::resize(original, resized, cv::Size(), resize_scale, resize_scale);
+
             pthread_mutex_lock(&mutex);
+
             camera::frame = resized;
+            camera::capture_time = current_time;
+            camera::frame_index++;
             frame_empty = 0;
+
             pthread_mutex_unlock(&mutex);
             double time = ((double)cv::getTickCount() - start) / cv::getTickFrequency();
             //*************************************testing img********************************//
