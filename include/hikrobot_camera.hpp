@@ -11,7 +11,7 @@
 namespace camera
 {
 //********** define ************************************/
-#define MAX_IMAGE_DATA_SIZE (4 * 2048 * 3072)
+#define MAX_IMAGE_DATA_SIZE (4 * 3648 * 5472)
     //********** frame ************************************/
     cv::Mat frame;
     //********** frame_empty ******************************/
@@ -39,6 +39,7 @@ namespace camera
         CAP_PROP_LINE_SELECTOR      //触发线
 
     };
+    float resize_scale;
 
     //^ *********************************************************************************** //
     //^ ********************************** Camera Class************************************ //
@@ -93,9 +94,15 @@ namespace camera
     {
         handle = NULL;
 
+        // Получаем серийный номер, указанный в launch файле (например, "12345678")
+        std::string serial_number;
+        node.param("serial_number", serial_number, std::string(""));
+        printf("Desired Serial Number: %s\n", serial_number.c_str());
+
         //********** 读取待设置的摄像头参数 第三个参数是默认值 yaml文件未给出该值时生效 ********************************/
-        node.param("width", width, 3072);
-        node.param("height", height, 2048);
+        node.param("width", width, 5472);
+        node.param("height", height, 3648);
+        node.param("resize_scale", resize_scale, 0.125f);
         node.param("FrameRateEnable", FrameRateEnable, false);
         node.param("FrameRate", FrameRate, 10);
         node.param("BurstFrameCount", BurstFrameCount, 10); // 一次触发采集的次数
@@ -111,6 +118,9 @@ namespace camera
         node.param("TriggerSource", TriggerSource, 2);
         node.param("LineSelector", LineSelector, 2);
 
+        printf("Resize scale: %f\n", resize_scale);
+
+
         //********** 枚举设备 ********************************/
         MV_CC_DEVICE_INFO_LIST stDeviceList;
         memset(&stDeviceList, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
@@ -120,7 +130,11 @@ namespace camera
             printf("MV_CC_EnumDevices fail! nRet [%x]\n", nRet);
             exit(-1);
         }
-        unsigned int nIndex = 0;
+
+
+        // Перебираем все найденные устройства и ищем камеру с заданным серийным номером
+        MV_CC_DEVICE_INFO *pSelectedDevice = NULL;
+        
         if (stDeviceList.nDeviceNum > 0)
         {
             for (int i = 0; i < stDeviceList.nDeviceNum; i++)
@@ -132,6 +146,18 @@ namespace camera
                     break;
                 }
                 PrintDeviceInfo(pDeviceInfo);
+                // Для USB-камер используем серийный номер
+                if (pDeviceInfo->nTLayerType == MV_USB_DEVICE)
+                {
+                    printf("Device serial num: %s, provided num: %s\n", pDeviceInfo->SpecialInfo.stUsb3VInfo.chSerialNumber, serial_number.c_str());
+                    if (strcmp(reinterpret_cast<const char*>(pDeviceInfo->SpecialInfo.stUsb3VInfo.chSerialNumber), serial_number.c_str()) == 0)
+                    {
+                        pSelectedDevice = pDeviceInfo;
+                        break;
+                    }
+                }
+                // Если необходимо, можно добавить аналогичное сравнение для GigE камер,
+                // если у них имеется поле серийного номера.
             }
         }
         else
@@ -140,9 +166,15 @@ namespace camera
             exit(-1);
         }
 
+        if (pSelectedDevice == NULL)
+        {
+            printf("No device found with serial number: %s\n", serial_number.c_str());
+            exit(-1);
+        }
+
         //********** 选择设备并创建句柄 *************************/
 
-        nRet = MV_CC_CreateHandle(&handle, stDeviceList.pDeviceInfo[0]);
+        nRet = MV_CC_CreateHandle(&handle, pSelectedDevice);
 
         if (MV_OK != nRet)
         {
@@ -630,6 +662,7 @@ namespace camera
         }
         else if (pstMVDevInfo->nTLayerType == MV_USB_DEVICE)
         {
+            printf("chSerialNumber:%s\n\n", pstMVDevInfo->SpecialInfo.stUsb3VInfo.chSerialNumber);
             printf("UserDefinedName:%s\n\n", pstMVDevInfo->SpecialInfo.stUsb3VInfo.chUserDefinedName);
         }
         else
@@ -683,8 +716,8 @@ namespace camera
             image_empty_count = 0; //空图帧数
             //转换图像格式为BGR8
 
-            stConvertParam.nWidth = 3072;                               //ch:图像宽 | en:image width
-            stConvertParam.nHeight = 2048;                              //ch:图像高 | en:image height
+            stConvertParam.nWidth = 5472;                               //ch:图像宽 | en:image width
+            stConvertParam.nHeight = 3648;                              //ch:图像高 | en:image height
             stConvertParam.pSrcData = m_pBufForDriver;                  //ch:输入数据缓存 | en:input data buffer
             stConvertParam.nSrcDataLen = MAX_IMAGE_DATA_SIZE;           //ch:输入数据大小 | en:input data size
             stConvertParam.enDstPixelType = PixelType_Gvsp_BGR8_Packed; //ch:输出像素格式 | en:output pixel format                      //! 输出格式 RGB
@@ -692,8 +725,12 @@ namespace camera
             stConvertParam.nDstBufferSize = MAX_IMAGE_DATA_SIZE;        //ch:输出缓存大小 | en:output buffer size
             stConvertParam.enSrcPixelType = stImageInfo.enPixelType;    //ch:输入像素格式 | en:input pixel format                       //! 输入格式 RGB
             MV_CC_ConvertPixelType(p_handle, &stConvertParam);
+            
+            cv::Mat original = cv::Mat(stImageInfo.nHeight, stImageInfo.nWidth, CV_8UC3, m_pBufForSaveImage).clone();
+            cv::Mat resized;
+            cv::resize(original, resized, cv::Size(), resize_scale, resize_scale);
             pthread_mutex_lock(&mutex);
-            camera::frame = cv::Mat(stImageInfo.nHeight, stImageInfo.nWidth, CV_8UC3, m_pBufForSaveImage).clone(); //tmp.clone();
+            camera::frame = resized;
             frame_empty = 0;
             pthread_mutex_unlock(&mutex);
             double time = ((double)cv::getTickCount() - start) / cv::getTickFrequency();

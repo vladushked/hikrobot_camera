@@ -1,0 +1,24 @@
+<launch>
+    <!-- Загружаем параметры для левой камеры в пространство имен ноды hikrobot_camera_left -->
+    <rosparam file="$(find hikrobot_camera)/config/camera.yaml" command="load" />
+    <!-- <rosparam file="$(find hikrobot_camera)/config/camera_left.yaml" command="load" ns="hikrobot_camera_left" /> -->
+
+    <!-- Загружаем параметры для правой камеры в пространство имен ноды hikrobot_camera_right -->
+    <!-- <rosparam file="$(find hikrobot_camera)/config/camera_right.yaml" command="load" ns="hikrobot_camera_right" /> -->
+
+    <!-- Нода для левой камеры -->
+    <!-- <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_left" respawn="false"/> -->
+
+    <!-- Нода для правой камеры -->
+    <!-- <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_right" respawn="false"/> -->
+
+    <!-- Нода для левой камеры -->
+    <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_left" respawn="false" output="screen">
+        <param name="serial_number" value="DA2324233" />
+    </node>
+
+    <!-- Нода для правой камеры -->
+    <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_right" respawn="false" output="screen">
+        <param name="serial_number" value="DA2813769" />
+    </node>
+</launch>
