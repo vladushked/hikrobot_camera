@@ -114,7 +114,7 @@ namespace camera
         node.param("ExposureTime", ExposureTime, 50000);
         node.param("GammaEnable", GammaEnable, false);
         node.param("Gamma", Gamma, (float)0.7);
-        node.param("GainAuto", GainAuto, 2);
+        node.param("GainAuto", GainAuto, 0);
         node.param("SaturationEnable", SaturationEnable,true);
         node.param("Saturation", Saturation, 128);
         node.param("Offset_x", Offset_x, 0);
@@ -243,7 +243,7 @@ namespace camera
             this->set(CAP_PROP_SATURATION, Saturation);
         //软件触发
         // ********** frame **********/
-        nRet = MV_CC_SetEnumValue(handle, "TriggerMode", 0);
+        nRet = MV_CC_SetEnumValue(handle, "TriggerMode", 1);
         if (MV_OK == nRet)
         {
             printf("set TriggerMode OK!\n");
@@ -251,6 +251,12 @@ namespace camera
         else
         {
             printf("MV_CC_SetTriggerMode fail! nRet [%x]\n", nRet);
+        }
+        nRet = MV_CC_SetEnumValue(handle, "SensorShutterMode", 1); //饱和度 默认128 最大255
+        if (MV_OK == nRet) {
+            printf("set SensorShutterMode OK! value=%d\n", 1);
+        } else {
+            printf("Set SensorShutterMode Failed! nRet = [%x]\n\n", nRet);
         }
 
         //********** 图像格式 **********/
@@ -710,15 +716,12 @@ namespace camera
         while (ros::ok())
         {
             start = static_cast<double>(cv::getTickCount());
-            nRet = MV_CC_GetOneFrameTimeout(p_handle, m_pBufForDriver, MAX_IMAGE_DATA_SIZE, &stImageInfo, 15);
+            nRet = MV_CC_GetOneFrameTimeout(p_handle, m_pBufForDriver, MAX_IMAGE_DATA_SIZE, &stImageInfo, 10000);
             ros::Time current_time = ros::Time::now();
-            if (nRet != MV_OK)
-            {
-                if (++image_empty_count > 100)
-                {
-                    ROS_INFO("The Number of Faild Reading Exceed The Set Value!\n");
-                    exit(-1);
-                }
+            if (nRet == MV_OK) {
+                printf("GetOneFrame, Width[%d], Height[%d], nFrameNum[%d]\n", stImageInfo.nWidth, stImageInfo.nHeight, stImageInfo.nFrameNum);
+            } else {
+                // printf("%s: No data[%x]\n", fname.c_str(), nRet);
                 continue;
             }
             image_empty_count = 0; //空图帧数

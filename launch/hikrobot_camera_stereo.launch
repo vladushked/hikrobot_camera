@@ -1,24 +1,53 @@
 <launch>
-    <!-- Загружаем параметры для левой камеры в пространство имен ноды hikrobot_camera_left -->
-    <rosparam file="$(find hikrobot_camera)/config/camera.yaml" command="load" />
-    <!-- <rosparam file="$(find hikrobot_camera)/config/camera_left.yaml" command="load" ns="hikrobot_camera_left" /> -->
-
-    <!-- Загружаем параметры для правой камеры в пространство имен ноды hikrobot_camera_right -->
-    <!-- <rosparam file="$(find hikrobot_camera)/config/camera_right.yaml" command="load" ns="hikrobot_camera_right" /> -->
-
-    <!-- Нода для левой камеры -->
-    <!-- <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_left" respawn="false"/> -->
-
-    <!-- Нода для правой камеры -->
-    <!-- <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_right" respawn="false"/> -->
+    <!-- Аргументы для параметров -->
+    <arg name="width" default="5472" />
+    <arg name="height" default="3648" />
+    <arg name="resize_scale" default="0.125" />
+    <arg name="FrameRateEnable" default="true" />
+    <arg name="FrameRate" default="10" />
+    <arg name="ExposureTime" default="5000" />
+    <arg name="GammaEnable" default="true" />
+    <arg name="Gamma" default="0.7" />
+    <arg name="GainAuto" default="2" />
+    <arg name="SaturationEnable" default="false" />
+    <arg name="Saturation" default="128" />
 
     <!-- Нода для левой камеры -->
     <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_left" respawn="false" output="screen">
         <param name="serial_number" value="DA2324233" />
+        
+        <!-- Используем аргументы для параметров -->
+        <param name="width" value="$(arg width)" />
+        <param name="height" value="$(arg height)" />
+        <param name="resize_scale" value="$(arg resize_scale)" />
+        <param name="FrameRateEnable" value="$(arg FrameRateEnable)" />
+        <param name="FrameRate" value="$(arg FrameRate)" />
+        <param name="ExposureTime" value="$(arg ExposureTime)" />
+        <param name="GammaEnable" value="$(arg GammaEnable)" />
+        <param name="Gamma" value="$(arg Gamma)" />
+        <param name="GainAuto" value="$(arg GainAuto)" />
+        <param name="SaturationEnable" value="$(arg SaturationEnable)" />
+        <param name="Saturation" value="$(arg Saturation)" />
     </node>
 
     <!-- Нода для правой камеры -->
     <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_right" respawn="false" output="screen">
         <param name="serial_number" value="DA2813769" />
+        
+        <!-- Используем аргументы для параметров -->
+        <param name="width" value="$(arg width)" />
+        <param name="height" value="$(arg height)" />
+        <param name="resize_scale" value="$(arg resize_scale)" />
+        <param name="FrameRateEnable" value="$(arg FrameRateEnable)" />
+        <param name="FrameRate" value="$(arg FrameRate)" />
+        <param name="ExposureTime" value="$(arg ExposureTime)" />
+        <param name="GammaEnable" value="$(arg GammaEnable)" />
+        <param name="Gamma" value="$(arg Gamma)" />
+        <param name="GainAuto" value="$(arg GainAuto)" />
+        <param name="SaturationEnable" value="$(arg SaturationEnable)" />
+        <param name="Saturation" value="$(arg Saturation)" />
     </node>
+
+    <!-- Включаем launch-файл для xsens_mti_driver -->
+    <include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch" />
 </launch>
