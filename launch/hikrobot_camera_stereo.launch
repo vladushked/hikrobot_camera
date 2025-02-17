@@ -1,53 +1,43 @@
 <launch>
-    <!-- Аргументы для параметров -->
-    <arg name="width" default="5472" />
-    <arg name="height" default="3648" />
-    <arg name="resize_scale" default="0.125" />
-    <arg name="FrameRateEnable" default="true" />
-    <arg name="FrameRate" default="10" />
-    <arg name="ExposureTime" default="5000" />
-    <arg name="GammaEnable" default="true" />
-    <arg name="Gamma" default="0.7" />
-    <arg name="GainAuto" default="2" />
-    <arg name="SaturationEnable" default="false" />
-    <arg name="Saturation" default="128" />
+    <!-- Аргументы для параметров камеры -->
+    <arg name="width" default="5472"/>
+    <arg name="height" default="3648"/>
+    <arg name="resize_scale" default="0.125"/>
+    <arg name="FrameRateEnable" default="true"/>
+    <arg name="FrameRate" default="2"/>
+    <arg name="ExposureTime" default="5000"/>
+    <arg name="GammaEnable" default="true"/>
+    <arg name="Gamma" default="0.7"/>
+    <arg name="GainAuto" default="0"/>
+    <arg name="Gain" default="1"/>
+    <arg name="SaturationEnable" default="false"/>
+    <arg name="Saturation" default="128"/>
 
-    <!-- Нода для левой камеры -->
-    <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_left" respawn="false" output="screen">
-        <param name="serial_number" value="DA2324233" />
-        
-        <!-- Используем аргументы для параметров -->
-        <param name="width" value="$(arg width)" />
-        <param name="height" value="$(arg height)" />
-        <param name="resize_scale" value="$(arg resize_scale)" />
-        <param name="FrameRateEnable" value="$(arg FrameRateEnable)" />
-        <param name="FrameRate" value="$(arg FrameRate)" />
-        <param name="ExposureTime" value="$(arg ExposureTime)" />
-        <param name="GammaEnable" value="$(arg GammaEnable)" />
-        <param name="Gamma" value="$(arg Gamma)" />
-        <param name="GainAuto" value="$(arg GainAuto)" />
-        <param name="SaturationEnable" value="$(arg SaturationEnable)" />
-        <param name="Saturation" value="$(arg Saturation)" />
-    </node>
+    <!-- Аргументы для серийных номеров камер -->
+    <arg name="left_serial" default="DA2324233"/>
+    <arg name="right_serial" default="DA2813769"/>
 
-    <!-- Нода для правой камеры -->
-    <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_camera_right" respawn="false" output="screen">
-        <param name="serial_number" value="DA2813769" />
-        
-        <!-- Используем аргументы для параметров -->
-        <param name="width" value="$(arg width)" />
-        <param name="height" value="$(arg height)" />
-        <param name="resize_scale" value="$(arg resize_scale)" />
-        <param name="FrameRateEnable" value="$(arg FrameRateEnable)" />
-        <param name="FrameRate" value="$(arg FrameRate)" />
-        <param name="ExposureTime" value="$(arg ExposureTime)" />
-        <param name="GammaEnable" value="$(arg GammaEnable)" />
-        <param name="Gamma" value="$(arg Gamma)" />
-        <param name="GainAuto" value="$(arg GainAuto)" />
-        <param name="SaturationEnable" value="$(arg SaturationEnable)" />
-        <param name="Saturation" value="$(arg Saturation)" />
+    <!-- Нода для двух камер -->
+    <node pkg="hikrobot_camera" type="hikrobot_camera" name="hikrobot_dual_camera" respawn="false" output="screen">
+        <!-- Передача индивидуальных серийных номеров -->
+        <param name="left_serial" value="$(arg left_serial)"/>
+        <param name="right_serial" value="$(arg right_serial)"/>
+
+        <!-- Общие параметры для обеих камер -->
+        <param name="width" value="$(arg width)"/>
+        <param name="height" value="$(arg height)"/>
+        <param name="resize_scale" value="$(arg resize_scale)"/>
+        <param name="FrameRateEnable" value="$(arg FrameRateEnable)"/>
+        <param name="FrameRate" value="$(arg FrameRate)"/>
+        <param name="ExposureTime" value="$(arg ExposureTime)"/>
+        <param name="GammaEnable" value="$(arg GammaEnable)"/>
+        <param name="Gamma" value="$(arg Gamma)"/>
+        <param name="GainAuto" value="$(arg GainAuto)"/>
+        <param name="Gain" value="$(arg Gain)"/>
+        <param name="SaturationEnable" value="$(arg SaturationEnable)"/>
+        <param name="Saturation" value="$(arg Saturation)"/>
     </node>
 
     <!-- Включаем launch-файл для xsens_mti_driver -->
-    <include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch" />
+    <include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch"/>
 </launch>
