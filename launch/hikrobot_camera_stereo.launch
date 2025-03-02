@@ -58,5 +58,5 @@
     </node>
 
     <!-- Включаем launch-файл для xsens_mti_driver -->
-    <include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch" />
+    <include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch"/>
 </launch>

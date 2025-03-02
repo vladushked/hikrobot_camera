@@ -25,22 +25,23 @@ namespace camera
     //********** CameraProperties config ************************************/
     enum CamerProperties
     {
-        CAP_PROP_FRAMERATE_ENABLE,  // 帧数可调
-        CAP_PROP_FRAMERATE,         // 帧数
-        CAP_PROP_BURSTFRAMECOUNT,   // 外部一次触发帧数
-        CAP_PROP_HEIGHT,            // 图像高度
-        CAP_PROP_WIDTH,             // 图像宽度
-        CAP_PROP_EXPOSURE_TIME,     // 曝光时间
-        CAP_PROP_GAMMA_ENABLE,      // 伽马因子可调
-        CAP_PROP_GAMMA,             // 伽马因子
-        CAP_PROP_GAINAUTO,          // 亮度
-        CAP_PROP_SATURATION_ENABLE, // 饱和度可调
-        CAP_PROP_SATURATION,        // 饱和度
-        CAP_PROP_OFFSETX,           // X偏置
-        CAP_PROP_OFFSETY,           // Y偏置
-        CAP_PROP_TRIGGER_MODE,      // 外部触发
-        CAP_PROP_TRIGGER_SOURCE,    // 触发源
-        CAP_PROP_LINE_SELECTOR      // 触发线
+        CAP_PROP_FRAMERATE_ENABLE,  //帧数可调
+        CAP_PROP_FRAMERATE,         //帧数
+        CAP_PROP_BURSTFRAMECOUNT,   //外部一次触发帧数
+        CAP_PROP_HEIGHT,            //图像高度
+        CAP_PROP_WIDTH,             //图像宽度
+        CAP_PROP_EXPOSURE_TIME,     //曝光时间
+        CAP_PROP_GAMMA_ENABLE,      //伽马因子可调
+        CAP_PROP_GAMMA,             //伽马因子
+        CAP_PROP_GAINAUTO,          //亮度
+        CAP_PROP_GAIN,          //亮度
+        CAP_PROP_SATURATION_ENABLE, //饱和度可调
+        CAP_PROP_SATURATION,        //饱和度
+        CAP_PROP_OFFSETX,           //X偏置
+        CAP_PROP_OFFSETY,           //Y偏置
+        CAP_PROP_TRIGGER_MODE,      //外部触发
+        CAP_PROP_TRIGGER_SOURCE,    //触发源
+        CAP_PROP_LINE_SELECTOR      //触发线
 
     };
     float resize_scale;
@@ -52,7 +53,7 @@ namespace camera
     {
     public:
         //********** 构造函数  ****************************/
-        Camera(ros::NodeHandle &node);
+        Camera(ros::NodeHandle &node, std::string serial_number);
         //********** 析构函数  ****************************/
         ~Camera();
         //********** 原始信息转换线程 **********************/
@@ -62,6 +63,8 @@ namespace camera
         bool PrintDeviceInfo(MV_CC_DEVICE_INFO *pstMVDevInfo);
         //********** 读图10个相机的原始图像 ********************************/
         void ReadImg(cv::Mat &image, ros::Time &capture_time, unsigned long &frame_index);
+
+        bool FrameEmpty();
 
     private:
         //********** handle ******************************/
@@ -92,13 +95,10 @@ namespace camera
     //^ *********************************************************************************** //
 
     //^ ********************************** Camera constructor************************************ //
-    Camera::Camera(ros::NodeHandle &node)
+    Camera::Camera(ros::NodeHandle &node, std::string serial_number)
     {
         handle = NULL;
 
-        // Получаем серийный номер, указанный в launch файле (например, "12345678")
-        std::string serial_number;
-        node.param("serial_number", serial_number, std::string(""));
         printf("Desired Serial Number: %s\n", serial_number.c_str());
 
         //********** 读取待设置的摄像头参数 第三个参数是默认值 yaml文件未给出该值时生效 ********************************/
